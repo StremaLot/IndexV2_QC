@@ -16,6 +16,7 @@ public class SM2PckDevice : FileSystemDeviceBase
   private readonly string _basePath;
   private readonly string _filePath;
   private readonly fioZIP_FILE _zipFile;
+  private readonly byte _nodePriority;
 
   #endregion
 
@@ -26,6 +27,8 @@ public class SM2PckDevice : FileSystemDeviceBase
     _basePath = basePath;
     _filePath = filePath;
     _zipFile = fioZIP_FILE.Open( _filePath );
+
+    _nodePriority = GetPriority();
   }
 
   #endregion
@@ -92,6 +95,8 @@ public class SM2PckDevice : FileSystemDeviceBase
     else
       node = new SM2FileSystemNode( this, entry, parent );
 
+    node.Priority = _nodePriority;
+
     if ( node != null )
       parent.AddChild( node );
   }
@@ -145,6 +150,14 @@ public class SM2PckDevice : FileSystemDeviceBase
     } ) );
 
     return node;
+  }
+
+  private byte GetPriority()
+  {
+    if ( _filePath.Contains( @"\ultra\" ) )
+      return byte.MaxValue;
+
+    return 0;
   }
 
   #endregion
