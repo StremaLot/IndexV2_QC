@@ -7,6 +7,7 @@
     string AssetName { get; }
     Type AssetType { get; }
     Type AssetFactoryType { get; }
+    byte Priority => Node.Priority;
 
     string EditorKey { get; }
 
