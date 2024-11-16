@@ -22,8 +22,11 @@ namespace Index.Modules.MeshEditor.Views
     {
       base.OnDisposing( dispose );
 
-      if ( this.Content is Panel contentPanel )
-        contentPanel.Children.Clear();
+      Dispatcher.Invoke( () =>
+      {
+        if ( this.Content is Panel contentPanel )
+          contentPanel.Children.Clear();
+      } );
 
       MeshViewer?.Dispose();
       MeshViewer = null;

@@ -13,6 +13,7 @@
     string DisplayName { get; }
     bool IsDirectory { get; }
     bool IsHidden { get; }
+    byte Priority { get; }
 
     IFileSystemNode Parent { get; }
     IFileSystemNode FirstChild { get; set; }

@@ -1,5 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows.Data;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Assimp;
@@ -7,8 +11,12 @@ using HelixToolkit.SharpDX.Core.Model;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
 using Index.Domain.Assets.Meshes;
+using Index.Domain.Assets.Textures;
+using Index.Domain.Assets.Textures.Dxgi;
+using Index.Textures;
 using Index.UI.ViewModels;
 using Index.Utilities;
+using Prism.Ioc;
 using PropertyChanged;
 using Serilog;
 
@@ -19,6 +27,8 @@ namespace Index.Modules.MeshEditor.ViewModels
   {
 
     #region Data Members
+
+    private readonly IDxgiTextureService _dxgiTextureService;
 
     private readonly object _collectionLock = new object();
     private ObservableCollection<ModelNodeViewModel> _nodes;
@@ -43,8 +53,10 @@ namespace Index.Modules.MeshEditor.ViewModels
 
     #region Constructor
 
-    public SceneViewModel()
+    public SceneViewModel( IContainerProvider container )
     {
+      _dxgiTextureService = container.Resolve<IDxgiTextureService>();
+
       _searchDebouncer = new ActionDebouncer( 1000, ApplySearchTerm );
       GroupModel = new SceneNodeGroupModel3D();
 
@@ -59,6 +71,8 @@ namespace Index.Modules.MeshEditor.ViewModels
 
     public void ApplyMeshAsset( IMeshAsset meshAsset )
     {
+      var loadTexturesTask = LoadTexturePreviews( meshAsset );
+
       using ( var importer = new Importer() )
       {
         var nodes = new ObservableCollection<ModelNodeViewModel>();
@@ -70,8 +84,6 @@ namespace Index.Modules.MeshEditor.ViewModels
             continue;
 
           meshNode.CullMode = SharpDX.Direct3D11.CullMode.Back;
-
-          ApplyMaterialToNode( meshAsset, meshNode );
 
           var nodeViewModel = new ModelNodeViewModel( meshNode );
           if ( meshAsset.LodMeshNames.Contains( meshNode.Name ) )
@@ -85,25 +97,41 @@ namespace Index.Modules.MeshEditor.ViewModels
             nodeViewModel.IsVolume = true;
           }
 
-
           nodes.Add( nodeViewModel );
         }
 
-        GroupModel.Dispatcher.Invoke( () =>
+        GroupModel.Dispatcher.BeginInvoke( () =>
         {
           GroupModel.AddNode( helixScene.Root );
-          GroupModel.SceneNode.InvalidateRender();
         } );
+
+        loadTexturesTask.Wait();
+        foreach ( var node in helixScene.Root.Traverse() )
+        {
+          if ( !( node is MeshNode meshNode ) )
+            continue;
+
+          ApplyMaterialToNode( meshAsset, meshNode );
+        }
 
         InitializeNodeCollection( nodes );
 
-        GroupModel.Dispatcher.Invoke( () =>
+        GroupModel.Dispatcher.BeginInvoke( () =>
         {
-          GroupModel.SceneNode.InvalidateRender();
           GroupModel.SceneNode.ForceUpdateTransformsAndBounds();
           GroupModel.GroupNode.ForceUpdateTransformsAndBounds();
           GroupModel.SceneNode.InvalidateRender();
         } );
+      }
+    }
+
+    public void ForceUpdateBounds()
+    {
+      GroupModel.InvalidateRender();
+      foreach ( var node in GroupModel.SceneNode.Traverse() )
+      {
+        if ( node is GeometryNode geoNode )
+          geoNode.Geometry.UpdateBounds();
       }
     }
 
@@ -123,6 +151,49 @@ namespace Index.Modules.MeshEditor.ViewModels
       GroupModel.Transform = transformGroup;
     }
 
+    private Task LoadTexturePreviews( IMeshAsset meshAsset )
+    {
+      var loadBlock = new ActionBlock<ITextureAsset>( LoadTexturePreview,
+        new() { MaxDegreeOfParallelism = Environment.ProcessorCount } );
+
+      foreach ( var texture in meshAsset.Textures.Values )
+        loadBlock.Post( texture );
+
+      loadBlock.Complete();
+      return loadBlock.Completion;
+    }
+
+    private void LoadTexturePreview( ITextureAsset asset )
+    {
+      if ( asset.Images is not null )
+        return;
+
+      switch ( asset )
+      {
+        case IDxgiTextureAsset dxgiTextureAsset:
+          GenerateDxgiPreviews( dxgiTextureAsset );
+          break;
+
+        default:
+          throw new NotImplementedException( $"{asset.GetType().Name} does not support previews." );
+      }
+    }
+
+    private void GenerateDxgiPreviews( IDxgiTextureAsset asset )
+    {
+      var previewStreams = _dxgiTextureService.CreateJpegImageStreams( asset.DxgiImage, includeMips: false );
+
+      var images = new List<ITextureAssetImage>();
+      for ( var i = 0; i < previewStreams.Length; i++ )
+      {
+        var previewStream = previewStreams[ i ];
+        var image = new TextureAssetImage( i, previewStream );
+        images.Add( image );
+      }
+
+      asset.SetPreviewImages( images );
+    }
+
     private void ApplyMaterialToNode( IMeshAsset meshAsset, MeshNode meshNode )
     {
       var nodeMaterial = meshNode.Material as PhongMaterialCore;
@@ -131,7 +202,8 @@ namespace Index.Modules.MeshEditor.ViewModels
 
       if ( nodeMaterial.DiffuseMap is null && nodeMaterial.DiffuseMapFilePath is not null )
       {
-        if ( !meshAsset.Textures.TryGetValue( nodeMaterial.DiffuseMapFilePath, out var texture ) )
+        if ( !meshAsset.Textures.TryGetValue( nodeMaterial.DiffuseMapFilePath, out var texture )
+          || texture?.Images is null )
         {
           Log.Logger.Error( "Failed to load texture {texName}.", nodeMaterial.Name );
           return;

@@ -1,7 +1,5 @@
 ﻿using Index.Domain.FileSystem;
 using Index.Profiles.SpaceMarine2.FileSystem.Files;
-using LibSaber.IO;
-using LibSaber.SpaceMarine2.Serialization;
 using LibSaber.SpaceMarine2.Structures.Resources;
 
 namespace Index.Profiles.SpaceMarine2.FileSystem;
@@ -14,6 +12,7 @@ public class SM2PckDevice : FileSystemDeviceBase
   private readonly string _basePath;
   private readonly string _filePath;
   private readonly fioZIP_FILE _zipFile;
+  private readonly byte _nodePriority;
 
   #endregion
 
@@ -24,6 +23,8 @@ public class SM2PckDevice : FileSystemDeviceBase
     _basePath = basePath;
     _filePath = filePath;
     _zipFile = fioZIP_FILE.Open( _filePath );
+
+    _nodePriority = GetPriority();
   }
 
   #endregion
@@ -62,30 +63,28 @@ public class SM2PckDevice : FileSystemDeviceBase
     var fileName = _filePath.Replace( _basePath, "" );
     var rootNode = new SM2FileSystemNode( this, fileName );
 
-    var taskList = new List<Task>();
     foreach ( var entry in _zipFile.Entries.Values )
     {
-      CreateNode( entry, rootNode, taskList );
+      CreateNode( entry, rootNode );
     }
-
-    Task.WaitAll( taskList.ToArray() );
 
     return rootNode;
   }
 
   private void CreateNode( 
     fioZIP_CACHE_FILE.ENTRY entry, 
-    IFileSystemNode parent,
-    List<Task> taskList)
+    IFileSystemNode parent)
   {
     SM2FileSystemNode node = null;
 
     var ext = Path.GetExtension( entry.FileName );
 
     if ( ext == ".resource" )
-      node = CreateResourceFileNode( entry, parent, taskList );
+      node = CreateResourceFileNode( entry, parent );
     else
       node = new SM2FileSystemNode( this, entry, parent );
+
+    node.Priority = _nodePriority;
 
     if ( node != null )
       parent.AddChild( node );
@@ -93,8 +92,7 @@ public class SM2PckDevice : FileSystemDeviceBase
 
   private SM2FileSystemNode CreateResourceFileNode( 
     fioZIP_CACHE_FILE.ENTRY entry,
-    IFileSystemNode parent,
-    List<Task> taskList)
+    IFileSystemNode parent )
   {
     var fileName = entry.FileName.Replace( ".resource", "" );
     var resourceExt = Path.GetExtension( fileName );
@@ -102,45 +100,24 @@ public class SM2PckDevice : FileSystemDeviceBase
     switch(resourceExt)
     {
       case ".pct":
-        return BeginInitResourceNode( new SM2TextureResourceFileNode( this, entry, parent ), taskList );
+        return new SM2TextureResourceFileNode( this, entry, parent );
       case ".tpl":
-        return BeginInitResourceNode( new SM2TemplateResourceFileNode( this, entry, parent ), taskList );
+        return new SM2TemplateResourceFileNode( this, entry, parent );
       case ".td":
-        return BeginInitResourceNode( new SM2TextureDefinitionResourceFileNode(this, entry, parent ), taskList );
+        return new SM2TextureDefinitionResourceFileNode(this, entry, parent );
       case ".scn":
-        return BeginInitResourceNode( new SM2SceneResourceFileNode( this, entry, parent ), taskList );
+        return new SM2SceneResourceFileNode( this, entry, parent );
       default:
         return new SM2FileSystemNode( this, entry, parent );
     }
   }
 
-  private SM2FileSystemNode BeginInitResourceNode<TResDesc>(SM2ResourceFileNode<TResDesc> node, List<Task> taskList)
-    where TResDesc : resDESC
+  private byte GetPriority()
   {
-    var task = Task.Run( () =>
-    {
-      var entry = node.Entry;
-      using var descStream = _zipFile.GetFileStream( node.Entry );
-      var reader = new NativeReader( descStream, Endianness.LittleEndian );
+    if ( _filePath.Contains( @"\ultra\" ) )
+      return byte.MaxValue;
 
-      var desc = Serializer<resDESC>.Deserialize( reader );
-
-      var expectedType = typeof(TResDesc);
-      var actualType = desc.GetType();
-      if( actualType != expectedType )
-      {
-        FAIL(
-          "resDESC deserialized to an unexpected type!\n" +
-          $"File: {entry.FileName}\n" +
-          $"Expected type: {expectedType.Name}\n" +
-          $"Actual type: {actualType.Name}" );
-      }
-
-      node.ResourceDescription = desc as TResDesc;
-    } );
-
-    taskList.Add( task );
-    return node;
+    return 1;
   }
 
   #endregion

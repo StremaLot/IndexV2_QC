@@ -110,6 +110,11 @@
                        FontSize="18" />
                 <Label Padding="0"
                        HorizontalAlignment="Center"
+                       Content="REDxEYE"
+                       Foreground="{DynamicResource Brushes.Foreground.Static}"
+                       FontSize="18" />
+                <Label Padding="0"
+                       HorizontalAlignment="Center"
                        Content="sleepyzay"
                        Foreground="{DynamicResource Brushes.Foreground.Static}"
                        FontSize="18" />

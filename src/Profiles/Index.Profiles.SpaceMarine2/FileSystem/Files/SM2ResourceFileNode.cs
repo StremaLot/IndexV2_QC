@@ -1,4 +1,6 @@
 ﻿using Index.Domain.FileSystem;
+using LibSaber.IO;
+using LibSaber.SpaceMarine2.Serialization;
 using LibSaber.SpaceMarine2.Structures.Resources;
 
 namespace Index.Profiles.SpaceMarine2.FileSystem.Files
@@ -7,9 +9,25 @@ namespace Index.Profiles.SpaceMarine2.FileSystem.Files
   public class SM2ResourceFileNode : SM2FileSystemNode
   {
 
+    #region Data Members
+
+    protected resDESC _resourceDescription;
+
+    #endregion
+
     #region Properties
 
-    public resDESC ResourceDescription { get; set; }
+    public resDESC ResourceDescription
+    {
+      get
+      {
+        if (_resourceDescription is null)
+          _resourceDescription = LoadResourceDesc();
+
+        return _resourceDescription;
+      }
+      set => _resourceDescription = value;
+    }
 
     #endregion
 
@@ -18,6 +36,19 @@ namespace Index.Profiles.SpaceMarine2.FileSystem.Files
     public SM2ResourceFileNode( IFileSystemDevice device, fioZIP_CACHE_FILE.ENTRY entry, IFileSystemNode parent = null )
       : base( device, entry, parent )
     {
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    private resDESC LoadResourceDesc()
+    {
+      var device = Device as SM2PckDevice;
+      using var descStream = device.GetStream( this );
+      var reader = new NativeReader( descStream, Endianness.LittleEndian );
+
+      return Serializer<resDESC>.Deserialize( reader );
     }
 
     #endregion
@@ -32,7 +63,7 @@ namespace Index.Profiles.SpaceMarine2.FileSystem.Files
 
     public new TResDesc ResourceDescription
     {
-      get => (TResDesc)base.ResourceDescription;
+      get => ( TResDesc ) base.ResourceDescription;
       set => base.ResourceDescription = value;
     }
 
