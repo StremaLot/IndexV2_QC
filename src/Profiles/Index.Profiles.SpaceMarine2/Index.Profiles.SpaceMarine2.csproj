@@ -55,7 +55,9 @@
 	</Target>
 
 	<Target Name="PostBuild" AfterTargets="ILRepack">
-		<Exec Command="echo $(FrameworkVersion)&#xD;&#xA;echo $(Platform)&#xD;&#xA;mkdir &quot;$(SolutionDir)src\Index.App\bin\$(Configuration)\net8.0-windows7.0\win-x64\GameProfiles\&quot;&#xD;&#xA;copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SolutionDir)src\Index.App\bin\$(Configuration)\net8.0-windows7.0\win-x64\GameProfiles\$(TargetName).dll&quot;&#xD;&#xA;mkdir &quot;$(SolutionDir)src\Index.App\bin\$(Configuration)\net8.0-windows7.0\GameProfiles\&quot;&#xD;&#xA;copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SolutionDir)src\Index.App\bin\$(Configuration)\net8.0-windows7.0\GameProfiles\$(TargetName).dll&quot;" />
+		<Exec Command="mkdir &quot;$(SolutionDir)src\Index.App\bin\$(Configuration)\net8.0-windows7.0\GameProfiles&quot;" ContinueOnError="true" />
+		<Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SolutionDir)src\Index.App\bin\$(Configuration)\net8.0-windows7.0\GameProfiles\$(TargetName).dll&quot;" />
+		<Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(SolutionDir)src\Index.App\bin\$(Configuration)\net8.0-windows7.0\GameProfiles\$(TargetName).pdb&quot;" />
 	</Target>
 
 </Project>
