@@ -1,10 +1,10 @@
 ﻿using Index.Domain.FileSystem;
-using Index.Profiles.SpaceMarine2.FileSystem.Files;
-using LibSaber.SpaceMarine2.Structures.Resources;
+using Index.Profiles.QuakeChampions.FileSystem.Files;
+using LibSaber.QuakeChampions.Structures.Resources;
 
-namespace Index.Profiles.SpaceMarine2.FileSystem;
+namespace Index.Profiles.QuakeChampions.FileSystem;
 
-public class SM2PckDevice : FileSystemDeviceBase
+public class QCPckDevice : FileSystemDeviceBase
 {
 
   #region Data Members
@@ -19,7 +19,7 @@ public class SM2PckDevice : FileSystemDeviceBase
 
   #region Constructor
 
-  public SM2PckDevice( string basePath, string filePath )
+  public QCPckDevice( string basePath, string filePath )
   {
     _basePath = basePath;
     _filePath = filePath;
@@ -34,8 +34,8 @@ public class SM2PckDevice : FileSystemDeviceBase
 
   public override Stream GetStream( IFileSystemNode node )
   {
-    var smNode = node as SM2FileSystemNode;
-    ASSERT( smNode != null, "Node is not an SM2FileSystemNode." );
+    var smNode = node as QCFileSystemNode;
+    ASSERT( smNode != null, "Node is not an QCFileSystemNode." );
 
     return _zipFile.GetFileStream( smNode.Entry );
   }
@@ -62,7 +62,7 @@ public class SM2PckDevice : FileSystemDeviceBase
   private IFileSystemNode InitNodes()
   {
     var fileName = _filePath.Replace( _basePath, "" );
-    var rootNode = new SM2FileSystemNode( this, fileName );
+    var rootNode = new QCFileSystemNode( this, fileName );
 
     foreach ( var entry in _zipFile.Entries.Values )
     {
@@ -76,14 +76,16 @@ public class SM2PckDevice : FileSystemDeviceBase
     fioZIP_CACHE_FILE.ENTRY entry, 
     IFileSystemNode parent)
   {
-    SM2FileSystemNode node = null;
+    QCFileSystemNode node = null;
 
     var ext = Path.GetExtension( entry.FileName );
 
-    if ( ext == ".resource" )
-      node = CreateResourceFileNode( entry, parent );
-    else
-      node = new SM2FileSystemNode( this, entry, parent );
+
+    //if ( ext == ".resource" )
+    node = CreateResourceFileNode( entry, parent );
+
+    //else
+    //node = new QCFileSystemNode( this, entry, parent );
 
     node.Priority = _nodePriority;
 
@@ -91,25 +93,25 @@ public class SM2PckDevice : FileSystemDeviceBase
       parent.AddChild( node );
   }
 
-  private SM2FileSystemNode CreateResourceFileNode( 
+  private QCFileSystemNode CreateResourceFileNode( 
     fioZIP_CACHE_FILE.ENTRY entry,
     IFileSystemNode parent )
   {
-    var fileName = entry.FileName.Replace( ".resource", "" );
+    var fileName = entry.FileName; //.Replace( ".resource", "" );
     var resourceExt = Path.GetExtension( fileName );
 
     switch(resourceExt)
     {
       case ".pct":
-        return new SM2TextureResourceFileNode( this, entry, parent );
+        return new QCTextureResourceFileNode( this, entry, parent );
       case ".tpl":
-        return new SM2TemplateResourceFileNode( this, entry, parent );
-      case ".td":
-        return new SM2TextureDefinitionResourceFileNode(this, entry, parent );
-      case ".scn":
-        return new SM2SceneResourceFileNode( this, entry, parent );
+        return new QCTemplateResourceFileNode( this, entry, parent );
+      case ".сtd":
+        return new QCTextureDefinitionResourceFileNode(this, entry, parent );
+      case ".lg":
+        return new QCSceneResourceFileNode( this, entry, parent );
       default:
-        return new SM2FileSystemNode( this, entry, parent );
+        return new QCFileSystemNode( this, entry, parent );
     }
   }
 

@@ -54,6 +54,7 @@ namespace Index.Domain.Assets
       foreach ( var device in fileSystem.Devices.Values )
       {
         var assetNodes = device.EnumerateFiles().OfType<IFileSystemAssetNode>();
+        
         foreach ( var assetNode in assetNodes )
           AddAssetReference( new AssetReference( assetNode ) );
       }

@@ -45,6 +45,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibSaber.HaloCEA", "..\LibS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibSaber.SpaceMarine2", "..\LibSaber\src\LibSaber.SpaceMarine2\LibSaber.SpaceMarine2.csproj", "{2BF2889D-6623-4C0E-9480-DBE3C81D96AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Index.Profiles.QuakeChampions", "src\Profiles\Index.Profiles.QuakeChampions\Index.Profiles.QuakeChampions.csproj", "{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSaber.QuakeChampions", "..\LibSaber\src\LibSaber.QuakeChampions\LibSaber.QuakeChampions.csproj", "{A304150F-7A21-448C-6678-62B2FC86D9EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -189,6 +193,22 @@ Global
 		{2BF2889D-6623-4C0E-9480-DBE3C81D96AD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2BF2889D-6623-4C0E-9480-DBE3C81D96AD}.Release|x64.ActiveCfg = Release|Any CPU
 		{2BF2889D-6623-4C0E-9480-DBE3C81D96AD}.Release|x64.Build.0 = Release|Any CPU
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}.Debug|x64.Build.0 = Debug|Any CPU
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}.Release|x64.ActiveCfg = Release|Any CPU
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3}.Release|x64.Build.0 = Release|Any CPU
+		{A304150F-7A21-448C-6678-62B2FC86D9EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A304150F-7A21-448C-6678-62B2FC86D9EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A304150F-7A21-448C-6678-62B2FC86D9EA}.Debug|x64.ActiveCfg = Debug|x64
+		{A304150F-7A21-448C-6678-62B2FC86D9EA}.Debug|x64.Build.0 = Debug|x64
+		{A304150F-7A21-448C-6678-62B2FC86D9EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A304150F-7A21-448C-6678-62B2FC86D9EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A304150F-7A21-448C-6678-62B2FC86D9EA}.Release|x64.ActiveCfg = Release|x64
+		{A304150F-7A21-448C-6678-62B2FC86D9EA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -208,6 +228,8 @@ Global
 		{6004C076-5430-40AA-84CC-B12C0A16021E} = {166C5E51-5839-4B4E-B3C7-B544351891C4}
 		{E29617FF-AD81-495F-95A1-15F85F4B83FB} = {166C5E51-5839-4B4E-B3C7-B544351891C4}
 		{2BF2889D-6623-4C0E-9480-DBE3C81D96AD} = {166C5E51-5839-4B4E-B3C7-B544351891C4}
+		{21EFD7AF-732E-1844-8B74-3AB82CD0F3B3} = {40D760FB-2918-496B-9DAE-05F86684B958}
+		{A304150F-7A21-448C-6678-62B2FC86D9EA} = {166C5E51-5839-4B4E-B3C7-B544351891C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6855B3DD-6FA8-4D39-96A2-C69AF901D39C}
