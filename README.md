@@ -13,6 +13,7 @@ Installing:
 3. Clone github repository with paste a link https://github.com/StremaLot/IndexV2_QC.git.
 4. At solution explorer choose Index.App, right click on it and Publish. Also do it with LibSaber.QuakeChampions and Index.Profiles.QuakeChampions 
 5. In publish directory create "GameProfiles" direcrory and put there Index.Profiles.QuakeChampions.dll from previous step.
+6. At satrting window click "+" and choose QC (or other supported games) directory.
 
 Note:
 This app creates cash files in pak directory for QC.
