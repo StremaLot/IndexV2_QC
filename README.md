@@ -9,9 +9,10 @@ Please don't hate me much. I'm total newbee in MODs, in C# and in programming as
 
 Installing:
 1. Download Visual Studio (Im using 2022).
-2. On start of VS clone github repository with paste a link  https://github.com/StremaLot/IndexV2_QC.git.
-3. Add existing progect LibSaber to Index.App via right click on it at solution explorer.
-4. Right click on Index.App and Publish.
+2. On start of VS clone github repository with paste a link https://github.com/StremaLot/LibSaber.git then exit from solutiom in menu File.
+3. Clone github repository with paste a link https://github.com/StremaLot/IndexV2_QC.git.
+4. At solution explorer choose Index.App, right click on it and Publish. Also do it with LibSaber.QuakeChampions and Index.Profiles.QuakeChampions 
+5. In publish directory create "GameProfiles" direcrory and put there Index.Profiles.QuakeChampions.dll from previous step.
 
 Note:
 This app creates cash files in pak directory for QC.
