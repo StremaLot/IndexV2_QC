@@ -3,7 +3,7 @@ A version of IndexV2 with support for multiple titles.
 
 Index is a tool for Halo: Combat Evolved Anniversary and Halo 2 Anniversary and Quake Champions that extracts textures, models, and more.
 
-![screen](https://github.com/StremaLot/IndexV2_QC/blob/game-modules/Awoken.jpg)
+![screen](https://github.com/StremaLot/IndexV2_QC/blob/QC_try/Awoken.jpg)
 
 Please don't hate me much. I'm total newbee in MODs, in C# and in programming as well. For newbees like me instructions below.
 Installing:
