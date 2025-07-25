@@ -46,32 +46,36 @@ namespace Index.Profiles.QuakeChampions.Jobs
       var name = Path.GetFileNameWithoutExtension( assetReference.AssetName );
       var template = Serializer<animTPL>.Deserialize( reader, new SerializationContext() );
 
-      Stream tplDataStream;
+      Stream tplDataStream = null;
       var device = assetReference.Node.Device;
-      int number_tpl_file;
-      number_tpl_file = 0;
-      var tplDataNodes = device.EnumerateFiles()
-        .Where( f => Path.GetFileNameWithoutExtension( f.Name ) == name )
-        .Take( 5 ) 
-        .ToList();
-      
-      foreach ( var item in tplDataNodes )
+      // Сначала ищем файл с расширением .tpl_data
+      var tplDataNode = device.EnumerateFiles()
+        .FirstOrDefault( f => Path.GetFileNameWithoutExtension( f.Name ) == name && Path.GetExtension( f.Name ).Equals( ".tpl_data", StringComparison.OrdinalIgnoreCase ) );
+      if ( tplDataNode != null )
       {
-        var name_tpl = item.Name;
-        number_tpl_file= number_tpl_file +1;
-        name_tpl = name_tpl.Substring( name_tpl.Length - 8 );
-        
-        if (name_tpl == "tpl_data")
+        tplDataStream = tplDataNode.Open();
+      }
+      else
+      {
+        // Если .tpl_data не найден, ищем .tpl с сигнатурой 1SERtpl
+        var tplNodes = device.EnumerateFiles()
+          .Where( f => Path.GetFileNameWithoutExtension( f.Name ) == name && Path.GetExtension( f.Name ).Equals( ".tpl", StringComparison.OrdinalIgnoreCase ) )
+          .ToList();
+        foreach ( var node in tplNodes )
+        {
+          using var candidateStream = node.Open();
+          var buffer = new byte[7];
+          candidateStream.Read( buffer, 0, 7 );
+          var sig = System.Text.Encoding.ASCII.GetString( buffer );
+          if ( sig == "1SERtpl" )
           {
-          break;
+            tplDataStream = node.Open();
+            break;
+          }
         }
       }
-
-      if ( number_tpl_file == 0 )
-        tplDataStream = assetReference.Node.Open(); 
-      else
-        tplDataStream = tplDataNodes[number_tpl_file-1].Open();
-
+      if ( tplDataStream == null )
+        tplDataStream = assetReference.Node.Open();
 
       var context = new SceneContext( name, template.GeometryGraph, tplDataStream );
 
