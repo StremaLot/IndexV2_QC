@@ -115,6 +115,10 @@ namespace Index.Domain.FileSystem
 
       foreach ( var filePath in Directory.EnumerateFiles( _basePath, extension, SearchOption.AllDirectories ) )
       {
+        // Пропускать файлы из директории prebuild
+        if (filePath.ToLower().Contains("\\prebuild\\"))
+          continue;
+
         var fileName = Path.GetFileNameWithoutExtension( filePath ).ToLower();
         if ( excludeSet.Contains( fileName ) )
           continue;
